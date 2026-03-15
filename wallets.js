@@ -1,7 +1,7 @@
 const { ethers } = require("ethers");
 
-// Base Sepolia testnet RPC
-const BASE_SEPOLIA_RPC = "https://sepolia.base.org";
+// Ethereum Sepolia testnet RPC
+const BASE_SEPOLIA_RPC = "https://ethereum-sepolia-rpc.publicnode.com";
 
 async function getProvider() {
   return new ethers.JsonRpcProvider(BASE_SEPOLIA_RPC);
