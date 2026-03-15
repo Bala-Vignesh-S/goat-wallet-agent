@@ -58,7 +58,7 @@ async function handleStatus() {
   return `
 📊 *Wallet Agent Status*
 
-💰 *ETH Price:* $${context.ethData.price}
+💰 *ETH Price:* $${context.ethData.price} _(${context.ethData.source})_
 📈 *24h Change:* ${context.ethData.change24h}%
 ${context.demand.emoji} *Demand Signal:* ${context.demand.signal}
 
