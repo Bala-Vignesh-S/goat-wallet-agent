@@ -12,24 +12,27 @@ async function getEthPrice() {
       change24h: data.usd_24h_change?.toFixed(2),
     };
   } catch (e) {
-    return { price: "unavailable", change24h: "N/A" };
+    return { price: "unavailable", change24h: "0" };
   }
 }
 
-// Fetch recent large transactions for a wallet (whale watching)
-async function getWhaleActivity(address) {
+// Get recent transactions for a wallet
+async function getWalletTxHistory(address, limit = 5) {
   try {
     const apiKey = process.env.ETHERSCAN_API_KEY;
+    if (!apiKey) return [];
     const res = await axios.get(
-      `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=5&sort=desc&apikey=${apiKey}`
+      `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=${limit}&sort=desc&apikey=${apiKey}&network=sepolia`
     );
     const txs = res.data.result;
     if (!Array.isArray(txs)) return [];
     return txs.map((tx) => ({
-      hash: tx.hash?.slice(0, 10) + "...",
+      hash: tx.hash,
+      shortHash: tx.hash?.slice(0, 10) + "...",
       value: (parseFloat(tx.value) / 1e18).toFixed(4) + " ETH",
-      from: tx.from?.slice(0, 8) + "...",
-      to: tx.to?.slice(0, 8) + "...",
+      direction: tx.from?.toLowerCase() === address.toLowerCase() ? "OUT" : "IN",
+      to: tx.to?.slice(0, 10) + "...",
+      from: tx.from?.slice(0, 10) + "...",
       age: Math.floor((Date.now() / 1000 - parseInt(tx.timeStamp)) / 60) + " mins ago",
     }));
   } catch (e) {
@@ -37,17 +40,26 @@ async function getWhaleActivity(address) {
   }
 }
 
-// Get wallet ETH balance
-async function getWalletBalance(address) {
+// Check for whale activity — large txs on a tracked address
+async function getWhaleActivity(address, thresholdEth = 10) {
   try {
     const apiKey = process.env.ETHERSCAN_API_KEY;
+    if (!apiKey) return [];
     const res = await axios.get(
-      `https://api.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${apiKey}`
+      `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=${apiKey}&network=sepolia`
     );
-    const balanceWei = res.data.result;
-    return (parseFloat(balanceWei) / 1e18).toFixed(6) + " ETH";
+    const txs = res.data.result;
+    if (!Array.isArray(txs)) return [];
+    return txs
+      .filter((tx) => parseFloat(tx.value) / 1e18 >= thresholdEth)
+      .map((tx) => ({
+        hash: tx.hash?.slice(0, 10) + "...",
+        value: (parseFloat(tx.value) / 1e18).toFixed(4) + " ETH",
+        from: tx.from?.slice(0, 10) + "...",
+        age: Math.floor((Date.now() / 1000 - parseInt(tx.timeStamp)) / 60) + " mins ago",
+      }));
   } catch (e) {
-    return "unavailable";
+    return [];
   }
 }
 
@@ -59,4 +71,4 @@ function getDemandSignal(change24h) {
   return { signal: "NEUTRAL", emoji: "🟡", action: "Hold current allocation" };
 }
 
-module.exports = { getEthPrice, getWhaleActivity, getWalletBalance, getDemandSignal };
+module.exports = { getEthPrice, getWalletTxHistory, getWhaleActivity, getDemandSignal };
