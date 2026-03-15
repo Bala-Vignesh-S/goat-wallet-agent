@@ -1,0 +1,50 @@
+services:
+  - type: web
+    name: goat-wallet-bot
+    runtime: node
+    rootDir: .
+    buildCommand: npm install
+    startCommand: node bot.js
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ETHERSCAN_API_KEY
+        sync: false
+      - key: HOT_WALLET_ADDRESS
+        sync: false
+      - key: COLD_WALLET_ADDRESS
+        sync: false
+      - key: HOT_WALLET_PRIVATE_KEY
+        sync: false
+      - key: ALLOWED_TELEGRAM_ID
+        sync: false
+
+  - type: web
+    name: goat-wallet-api
+    runtime: node
+    rootDir: api
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ETHERSCAN_API_KEY
+        sync: false
+      - key: HOT_WALLET_ADDRESS
+        sync: false
+      - key: COLD_WALLET_ADDRESS
+        sync: false
+      - key: HOT_WALLET_PRIVATE_KEY
+        sync: false
+
+  - type: web
+    name: goat-wallet-webapp
+    runtime: static
+    rootDir: webapp
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        sync: false
