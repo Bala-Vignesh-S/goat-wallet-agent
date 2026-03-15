@@ -1,0 +1,16 @@
+{
+  "name": "goat-wallet-agent",
+  "version": "1.0.0",
+  "description": "AI crypto wallet agent on Telegram",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0",
+    "@google/generative-ai": "^0.21.0",
+    "ethers": "^6.13.0",
+    "axios": "^1.7.0",
+    "dotenv": "^16.4.0"
+  }
+}
